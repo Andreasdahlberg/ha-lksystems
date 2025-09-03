@@ -12,7 +12,6 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import PERCENTAGE, UnitOfEnergy
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -93,6 +92,16 @@ LK_CUBICSECURE_SENSORS: dict[str, SensorEntityDescription] = {
         state_class=SensorStateClass.MEASUREMENT,
         translation_key="water_pressure_sensor",
     ),
+    "leakState": SensorEntityDescription(
+        key="leakState",
+        name="Leak Status",
+        icon="mdi:water-alert",
+        device_class=None,
+        unit_of_measurement=None,
+        native_unit_of_measurement=None,
+        state_class=None,
+        translation_key="leak_status_sensor",
+    ),
 }
 
 
@@ -101,7 +110,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up the LK system cubic sensor."""
     coordinator: LKSystemCoordinator = hass.data[DOMAIN][entry.entry_id]
-    entities: list[AbstractLkCubicSensorSensor] = []
+    entities: list[AbstractLkCubicSensor] = []
     Lk_data: LkStructureResp = coordinator.data
 
     _LOGGER.debug(
@@ -120,6 +129,8 @@ async def async_setup_entry(
         if key == "tempWaterMax":
             entities.append(LKCubicSensor(coordinator, description))
         if key == "waterPressure":
+            entities.append(LKCubicSensor(coordinator, description))
+        if key == "leakState":
             entities.append(LKCubicSensor(coordinator, description))
 
     async_add_entities(entities, True)
