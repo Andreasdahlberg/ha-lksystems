@@ -219,7 +219,12 @@ class LKCubicSensor(AbstractLkCubicSensor):
     @property
     def native_value(self) -> str | None:
         """Get the latest state value."""
-        if self._data_key in self._coordinator.data["cubic_last_messurement"]:
+        # Handle special case for leakState which is nested in leak object
+        if self._data_key == "leakState":
+            leak_data = self._coordinator.data["cubic_last_messurement"].get("leak")
+            if leak_data and "leakState" in leak_data:
+                return leak_data["leakState"]
+        elif self._data_key in self._coordinator.data["cubic_last_messurement"]:
             return self._coordinator.data["cubic_last_messurement"][self._data_key]
 
         return None
